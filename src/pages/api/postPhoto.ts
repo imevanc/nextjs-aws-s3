@@ -15,7 +15,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       Bucket: process.env.AWS_BUCKET_NAME!,
       Key: filename?.toString()!,
       Conditions: [
-        ["content-length-range", 0, 10485760], // up to 10 MB
+        // ["content-length-range", 0, 10485760], // up to 10 MB
         ["starts-with", "$Content-Type", contentType?.toString()!],
       ],
       Fields: {
