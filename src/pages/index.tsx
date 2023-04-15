@@ -2,13 +2,15 @@ import React from "react";
 
 export default function Home() {
   const [file, setFile] = React.useState<File | null>(null);
-  const [uploading, setUploading] = React.useState(false);
+  const [uploading, setUploading] = React.useState<boolean>(false);
+  const [message, setMessage] = React.useState<string>("");
+  const [show, setShow] = React.useState<string>("hidden");
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
     if (!file) {
-      alert("Please select a file to upload.");
+      setMessage("Please select a file to upload.");
       return;
     }
 
@@ -33,21 +35,27 @@ export default function Home() {
       });
 
       if (uploadResponse.ok) {
-        alert("Upload successful!");
+        setMessage("Upload successful!");
       } else {
         console.error("S3 Upload Error:", uploadResponse);
-        alert("Upload failed.");
+        setMessage("Upload failed.");
       }
     } else {
-      alert("Failed to get pre-signed URL.");
+      setMessage("Failed to get pre-signed URL.");
     }
 
     setUploading(false);
   };
 
+  React.useEffect((): void => {
+    if (message.length > 0) {
+      setShow("block");
+    }
+  }, [show, message]);
+
   return (
     <main>
-      <div className="bg-white py-16 sm:py-24">
+      <div className="bg-white h-screen sm:h-full sm:py-24">
         <div className="mx-auto max-w-7xl sm:px-6 lg:px-8">
           <div className="relative isolate overflow-hidden bg-gray-900 px-6 py-24 shadow-2xl sm:rounded-3xl sm:px-24 xl:py-32">
             <h2 className="mx-auto max-w-2xl text-center text-3xl font-bold tracking-tight text-white sm:text-4xl">
@@ -77,9 +85,14 @@ export default function Home() {
                 Upload
               </button>
             </form>
+            <div className={`pt-2 relative ${show}`}>
+              <div className="absolute left-[40%] mx-auto rounded-md bg-white/5 px-3.5 py-4 text-white">
+                {message}
+              </div>
+            </div>
             <svg
               viewBox="0 0 1024 1024"
-              className="absolute left-1/2 top-1/2 -z-10 h-[64rem] w-[64rem] -translate-x-1/2"
+              className="absolute left-1/2 top-1/2 -z-10 sm:h-[64rem] w-[64rem] -translate-x-1/2"
               aria-hidden="true"
             >
               <circle
