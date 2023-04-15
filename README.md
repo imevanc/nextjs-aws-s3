@@ -36,3 +36,8 @@ An example of a Next.js application allowing you to upload photos to an Amazon W
     }
   ]
   ```
+
+## Demo
+
+https://user-images.githubusercontent.com/96417438/232252729-3ccc1841-f35d-41c0-a413-af9fa64e6da3.mp4
+
