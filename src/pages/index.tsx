@@ -1,11 +1,8 @@
-import { useState } from "react";
-import { Inter } from "next/font/google";
+import React from "react";
 
-const inter = Inter({ subsets: ["latin"] });
-
-export default function Page() {
-  const [file, setFile] = useState<File | null>(null);
-  const [uploading, setUploading] = useState(false);
+export default function Home() {
+  const [file, setFile] = React.useState<File | null>(null);
+  const [uploading, setUploading] = React.useState(false);
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -20,7 +17,7 @@ export default function Page() {
     const response = await fetch(
       `/api/postPhoto?filename=${file.name}&contentType=${file.type}`
     );
-    console.log(response);
+
     if (response.ok) {
       const { url, fields } = await response.json();
 
@@ -29,8 +26,6 @@ export default function Page() {
         formData.append(key, value as string);
       });
       formData.append("file", file);
-
-      console.log(formData.append);
 
       const uploadResponse = await fetch(url, {
         method: "POST",
