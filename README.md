@@ -2,6 +2,9 @@
 
 An example of a Next.js application allowing you to upload photos to an Amazon Web Services S3 storage bucket.
 
+## Work In Progress Dev Article
+https://dev.to/imevanc/nextjs-aws-s3-upload-1i6a-temp-slug-7466173?preview=0a3d003289e738918f950710147e2417e95129b81c8462ab066ac950d004151a50bf8ced5737f72f3298152a573f07f5ea4fab1b00d482a783e7eccb
+
 ## Next.js steps
 
 - Create a new Next.js project or fork this repo.
