@@ -15,7 +15,7 @@ https://dev.to/imevanc/nextjs-aws-s3-upload-1i6a-temp-slug-7466173?preview=0a3d0
   1.  Select "Attach existing policies directly"
   2.  Add `AmazonS3FullAccess`
 - Create a new [S3 Bucket](https://console.aws.amazon.com/s3/)
-  1.  In the Object Ownership tab, select "ACLs enabled" & "Bucket owner preffered"
+  1.  In the Object Ownership tab, select "ACLs enabled" & "Bucket owner preferred"
   2.  In Block Public Access settings for this bucket, uncheck "Block all public access"
   3.  The bucket needs to be in the same region as your IAM user
 - Save the access key and secret key for the IAM User.
