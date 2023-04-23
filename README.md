@@ -1,3 +1,6 @@
+## 🎯 Update - April 2023 
+I'm working on an updated nextjs-aws application, where the user is able to get, put and delete data from an S3 storage bucket. In addition to it, I've integrated Amazon CloudFront for caching data in order to decrease the latency across different regions. The performance test before and after the CloudFront integration will be illustrated in the README.md of this new project.
+
 # Next.js with AWS S3
 
 An example of a Next.js application allowing you to upload photos to an Amazon Web Services S3 storage bucket.
