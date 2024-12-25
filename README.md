@@ -1,3 +1,17 @@
+## 🎯 Update - December 2024 🎯
+
+I have updated the project to use the latest versions of key technologies:
+
+- **Next.js**: Upgraded to version 15 with the new App Router for enhanced routing capabilities.
+- **React.js**: Upgraded to version 19 for improved performance and new hooks functionality.
+- **Renovate**: Integrated Renovate to automate dependency updates and keep the project up to date with minimal manual
+  effort.
+- **Amazon CloudFront**: The integration is still pending. This will be implemented in an upcoming update to further
+  reduce latency and improve content delivery across regions.
+
+These updates aim to enhance the project's maintainability, scalability, and performance while staying aligned with
+modern development standards.
+
 ## 🎯 Update - April 2023 🎯
 
 I am currently working on an updated Next.js-AWS application that enables users to get, put, and delete data from an S3
