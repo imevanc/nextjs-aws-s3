@@ -1,69 +1,130 @@
-## 🎯 Update - December 2024 🎯
+# Next.js + AWS S3 + CloudFront CDN
 
-I have updated the project to use the latest versions of key technologies:
+This project uploads images to Amazon S3 with a pre-signed POST URL and serves them through Amazon CloudFront for lower global latency.
 
-- **Next.js**: Upgraded to version 15 with the new App Router for enhanced routing capabilities.
-- **React.js**: Upgraded to version 19 for improved performance and new hooks functionality.
-- **Renovate**: Integrated Renovate to automate dependency updates and keep the project up to date with minimal manual
-  effort.
-- **Amazon CloudFront**: The integration is still pending. This will be implemented in an upcoming update to further
-  reduce latency and improve content delivery across regions.
+## What is included
 
-These updates aim to enhance the project's maintainability, scalability, and performance while staying aligned with
-modern development standards.
+- Next.js 15 (App Router)
+- React 19
+- S3 upload API route (`src/app/api/route.ts`)
+- CloudFront delivery URL in API response (`cdnObjectUrl`)
+- Built-in browser benchmark demo on the homepage to compare `S3 Direct` vs `CloudFront CDN`
 
-## 🎯 Update - April 2023 🎯
+## Architecture
 
-I am currently working on an updated Next.js-AWS application that enables users to get, put, and delete data from an S3
-storage bucket. Additionally, I have integrated Amazon CloudFront for caching data to reduce latency across different
-regions. The performance test results, comparing before and after the CloudFront integration, will be documented in the
-README.md of this new project.
+1. User selects a file in the UI.
+2. Frontend calls `/api?filename=...&contentType=...`.
+3. API returns:
+   - `uploadUrl` + `fields` (for S3 pre-signed POST)
+   - `s3ObjectUrl` (direct S3 object URL)
+   - `cdnObjectUrl` (CloudFront URL, if `CLOUDFRONT_DOMAIN` is configured)
+4. Frontend uploads directly to S3.
+5. Frontend previews the uploaded image from CloudFront and can run a latency demo.
 
-# Next.js with AWS S3
+## Prerequisites
 
-An example of a Next.js application that allows you to upload photos to an Amazon Web Services S3 storage bucket.
+- AWS account
+- S3 bucket
+- CloudFront distribution (origin = S3 bucket)
+- Node.js 20+
 
-## Dev.to Article
+## AWS setup
 
-[Next.js + AWS S3 Upload](https://dev.to/imevanc/nextjs-aws-s3-upload-3njb)
+### 1) IAM user
 
-<img src="https://user-images.githubusercontent.com/96417438/233210789-16e18fb3-9d31-4c17-8d09-8f3de2aa3133.png" width=500/>
+Create an IAM user with least-privilege S3 permissions for your upload bucket.
 
-## Next.js Steps
+### 2) S3 bucket
 
-- Create a new Next.js project or fork this repository.
+- Keep bucket in your preferred region.
+- For this demo, objects are uploaded with `public-read` ACL.
+- Add bucket CORS:
 
-## AWS Console Steps
+```json
+[
+  {
+    "AllowedHeaders": ["*"],
+    "AllowedMethods": ["GET", "PUT", "POST", "DELETE", "HEAD"],
+    "AllowedOrigins": ["*"],
+    "ExposeHeaders": []
+  }
+]
+```
 
-- Create a new [IAM User](https://aws.amazon.com/iam/):
-    1. Select `Attach existing policies directly`.
-    2. Add the `AmazonS3FullAccess` policy.
-- Create a new [S3 Bucket](https://console.aws.amazon.com/s3/):
-    1. In the **Object Ownership** tab, select `ACLs enabled & Bucket owner preferred`.
-    2. In the **Block Public Access** settings for this bucket, uncheck `Block all public access`.
-    3. Ensure the bucket is in the same region as your IAM user.
-- Save the access key and secret key for the IAM User:
-    1. These keys will be used for programmatic access in the API route.
-- Install the [AWS CLI](https://aws.amazon.com/cli/):
-    1. Run `aws configure`.
-    2. Enter your root AWS user access key, secret key, and the bucket's region name.
-- Create an `.env` file:
-    1. Enter the access key and secret key from the IAM User.
-    2. Add this file to your `.gitignore` to secure sensitive dependencies.
-- Go to your bucket and select the **Permissions** tab:
-    1. Scroll down to find **Cross-origin resource sharing (CORS)** and click `Edit` on the right side.
-    2. Paste the following code:
-  ```json
-  [
-    {
-      "AllowedHeaders": ["*"],
-      "AllowedMethods": ["GET", "PUT", "POST", "DELETE"],
-      "AllowedOrigins": ["*"],
-      "ExposeHeaders": []
-    }
-  ] 
-  ```
+### 3) CloudFront distribution
 
-## Demo
+- Origin: your S3 bucket
+- Viewer protocol policy: Redirect HTTP to HTTPS
+- Allowed methods: `GET, HEAD, OPTIONS`
+- Cache policy: managed cache policy (or custom with reasonable TTL)
+- Enable compression
+- Copy your distribution domain (example: `d111111abcdef8.cloudfront.net`)
 
-https://user-images.githubusercontent.com/96417438/232252729-3ccc1841-f35d-41c0-a413-af9fa64e6da3.mp4
+## Environment variables
+
+Copy `.env.example` to `.env.local` and update values.
+
+```bash
+cp .env.example .env.local
+```
+
+Required values:
+
+- `AWS_ACCESS_KEY_ID`
+- `AWS_SECRET_ACCESS_KEY`
+- `AWS_REGION`
+- `AWS_BUCKET_NAME`
+- `CLOUDFRONT_DOMAIN` (without `https://`)
+
+## Run locally
+
+```bash
+npm install
+npm run dev
+```
+
+Open `http://localhost:3000`.
+
+## CDN demo you can showcase
+
+The home page includes a **Run CDN demo** button.
+
+### Demo script for presentation
+
+1. Upload one image.
+2. Show side-by-side previews:
+   - CloudFront URL
+   - Direct S3 URL
+3. Click **Run CDN demo**.
+4. The app performs 5 fetches against each source and prints sample timings + average.
+5. Run it twice:
+   - First run warms cache.
+   - Second run usually shows stronger CloudFront advantage.
+
+### Talking points
+
+- CloudFront serves from edge locations closer to end users.
+- Repeated requests benefit from edge cache hits.
+- Direct S3 always goes to bucket region, increasing latency for distant users.
+
+## API response example
+
+```json
+{
+  "uploadUrl": "https://your-bucket.s3.eu-central-1.amazonaws.com",
+  "fields": {
+    "key": "uploads/1710000000000-photo.jpg",
+    "acl": "public-read",
+    "Content-Type": "image/jpeg"
+  },
+  "objectKey": "uploads/1710000000000-photo.jpg",
+  "s3ObjectUrl": "https://your-bucket.s3.eu-central-1.amazonaws.com/uploads/1710000000000-photo.jpg",
+  "cdnObjectUrl": "https://d111111abcdef8.cloudfront.net/uploads/1710000000000-photo.jpg"
+}
+```
+
+## Notes
+
+- The benchmark runs in the browser and reflects your current network location.
+- For production, prefer private S3 + CloudFront Origin Access Control and signed URLs/cookies where needed.
+- If you overwrite object keys, consider versioned keys or invalidations for freshness.
